@@ -1,22 +1,33 @@
 
+const port = 25000;
+const controller_ip = "esp.lan";
+
+function sendPackage(ip, port, message) {
+    const dgram = require('dgram');
+    const client = dgram.createSocket('udp4');
+
+    client.send(message, 0, message.length, port, controller_ip, (err) => {
+        client.close();
+    });
+}
+
+
 function oneColor(color) {
     twoColors(color, color);
 }
 
 function twoColors(color1, color2) {
-    const dgram = require('dgram');
-    const client = dgram.createSocket('udp4');
-    const port = 25000;
 
     let command = Buffer.from([0x02]);
     let message = Buffer.concat([command,
         Buffer.from(color1), Buffer.from(color2)]);
-    const controller_ip = "esp.lan";
 
-    client.send(message, 0, 7, port, controller_ip, (err) => {
-        client.close();
-    });
+    sendPackage("esp.lan", port, message);
 }
+
+
+
+
 
 function shuffle() {
     let r = () => {
@@ -51,9 +62,63 @@ function fromTo(color1, color2, delay) {
     }, delay);
 }
 
+function hsvToRgb(h, s, v) {
+    let c = v * s;
+    let x = c * (1 - Math.abs((h / 60) % 2 - 1))
+    let m = v - c;
+
+    h = h % 360;
+    if (h < 60) {
+        rgb = [c, x, 0];
+    } else if (h < 120) {
+        rgb = [x, c, 0];
+    } else if (h < 180) {
+        rgb = [0, c, x];
+    } else if (h < 240) {
+        rgb = [0, x, c];
+    } else if (h < 300) {
+        rgb = [x, 0, c];
+    } else {
+        rgb = [c, 0, x];
+    }
+
+    function scale(v) { return Math.floor((v + m) * 255); }
+    return [scale(rgb[0]), scale(rgb[1]), scale(rgb[2])];
+}
+
+function sendProgram() {
+    let testLength = 50;
+    let program = []
+    for (let index = 0; index < testLength; index++) {
+        program.push({
+            ms: 100,
+            color1: hsvToRgb(index * (360 / testLength), 0.8, 0.8),
+            color2: hsvToRgb(index * (360 / testLength)+80, 0.8, 0.4)
+        });
+    }
+
+    let message = Buffer.alloc(1 + 4 + program.length * 10);
+    message[0] = 0x03; // Command    
+    message.writeUInt32BE(program.length, 1); // Number of program steps
+    for (let index = 0; index < program.length; index++) {
+        let pIndex = 5 + index * 10;
+        let curProgram = program[index];
+        message.writeUInt32BE(curProgram.ms, pIndex)
+        message[pIndex + 4] = curProgram.color1[0];
+        message[pIndex + 5] = curProgram.color1[1];
+        message[pIndex + 6] = curProgram.color1[2];
+        message[pIndex + 7] = curProgram.color2[0];
+        message[pIndex + 8] = curProgram.color2[1];
+        message[pIndex + 9] = curProgram.color2[2];
+    }
+
+    console.log(message)
+    sendPackage("esp.lan", port, message);
+}
+
 exports.oneColor = oneColor;
 exports.twoColor = twoColors;
 exports.off = () => oneColor([0, 0, 0]);
 exports.shuffle = shuffle;
 exports.fromTo = fromTo;
-
+exports.sendProgram = sendProgram;
