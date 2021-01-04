@@ -86,14 +86,14 @@ function hsvToRgb(h, s, v) {
     return [scale(rgb[0]), scale(rgb[1]), scale(rgb[2])];
 }
 
-function sendProgram() {
-    let testLength = 50;
+function pulse(v1, v2) {
+    let testLength = 80;
     let program = []
     for (let index = 0; index < testLength; index++) {
         program.push({
-            ms: 100,
-            color1: hsvToRgb(index * (360 / testLength), 0.8, 0.8),
-            color2: hsvToRgb(index * (360 / testLength)+80, 0.8, 0.4)
+            ms: 90,
+            color1: hsvToRgb(index * (360 / testLength), 0.8, v1),
+            color2: hsvToRgb(index * (360 / testLength) + 80, 0.8, v2)
         });
     }
 
@@ -111,9 +111,11 @@ function sendProgram() {
         message[pIndex + 8] = curProgram.color2[1];
         message[pIndex + 9] = curProgram.color2[2];
     }
-
-    console.log(message)
     sendPackage("esp.lan", port, message);
+}
+
+function sendProgram() {
+    pulse(0.8, 0.4);
 }
 
 exports.oneColor = oneColor;
@@ -122,3 +124,4 @@ exports.off = () => oneColor([0, 0, 0]);
 exports.shuffle = shuffle;
 exports.fromTo = fromTo;
 exports.sendProgram = sendProgram;
+exports.pulse = pulse;

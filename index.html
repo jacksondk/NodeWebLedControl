@@ -2,6 +2,7 @@
 
 <head>
     <title>LED Control</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -9,60 +10,27 @@
 
     <button id="low">Low</button>
 
-    <div class="slidecontainers">
-        <div>
-            <input type="range" min="0" max="255" value="50" class="slider" id="red1">
-            <input type="range" min="0" max="255" value="50" class="slider" id="green1">
-            <input type="range" min="0" max="255" value="50" class="slider" id="blue1">
-        </div>
-        <div>
-            <input type="range" min="0" max="255" value="50" class="slider" id="red2">
-            <input type="range" min="0" max="255" value="50" class="slider" id="green2">
-            <input type="range" min="0" max="255" value="50" class="slider" id="blue2">
-        </div>
-        <button id="setColor">Set Color</button>
+    <div id="twocolor" class="flexcontainer">
+        <button data-jscolor="{width: 700, height: 400, sliderSize: 100}" id="color1" class="colorpicker flex">Back color</button>
+        <button data-jscolor="{width: 700, height: 400, sliderSize: 100}" id="color2" class="colorpicker flex">Inner color</button>
     </div>
 
+    
     <p id="status"></p>
 
+    <div class="slidecontainers">
+        <div>
+            <label for="v1" class="colorlabel">Back intensity</label><input type="range" min="0" max="100" value="10" class="slider" id="v1">
+            <label for="v2" class="colorlabel">Inner intensity</label><input type="range" min="0" max="100" value="10" class="slider" id="v2">
+        </div>
+        <button id="pulse">Pulse</button>
+    </div>
 
-    <script type="application/javascript">
-        document.getElementById("turnOff").onclick = () => {
-            fetch('/turnoff', { method: 'POST' }).then(response => {
-                document.getElementById("status").innerText = response.statusText;
-            });
-        };
+    <input data-jscolor=""></div>
 
-        document.getElementById("low").onclick = () => {
-            fetch('/color', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8'
-                },
-                body: JSON.stringify({ color1: [3, 0, 0], color2: [2,0,0] })
-            }).then(response => {
-                document.getElementById("status").innerText = response.statusText;
-            });
-        };
-        document.getElementById("setColor").onclick = () => {
-            let red1 = parseInt(document.getElementById("red1").value)
-            let green1 = parseInt(document.getElementById("green1").value)
-            let blue1 = parseInt(document.getElementById("blue1").value)
-            let red2 = parseInt(document.getElementById("red2").value)
-            let green2 = parseInt(document.getElementById("green2").value)
-            let blue2 = parseInt(document.getElementById("blue2").value)
-            fetch('/color', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8'
-                },
-                body: JSON.stringify({ color1: [red1, green1, blue1], color2: [red2, green2, blue2] })
-            }).then(response => {
-                document.getElementById("status").innerText = response.statusText;
-            });
-        };
 
-    </script>
+    <script type="application/javascript" src="js/jscolor.js"></script>
+    <script type="application/javascript" src="js/main.js"></script>
 
 </body>
 

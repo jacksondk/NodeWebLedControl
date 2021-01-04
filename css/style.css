@@ -1,0 +1,14 @@
+
+.colorpicker {
+    font-size: 32pt;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.flexcontainer {
+    display: flex;
+}
+
+.flex {
+    flex-grow: 1;
+}
